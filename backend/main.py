@@ -5,8 +5,8 @@ import pandas as pd
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from .services.intelligence import get_agricultural_intelligence
-from .services.decision_agent import generate_field_decision
+from services.intelligence import get_agricultural_intelligence
+from services.decision_agent import generate_field_decision
 
 
 # ============================================================

@@ -994,67 +994,44 @@ function App() {
 
               <div className="prediction-card result-reveal">
 
-                <div className="prediction-icon">
-
-                  <Activity size={22} />
-
+                <div className="result-heading">
+                  <div className="prediction-icon">
+                    <Activity size={22} />
+                  </div>
+                  <span>FIELD INTELLIGENCE</span>
                 </div>
 
-
-                <div>
-
-                  <span>
-                    MODEL PREDICTION
-                  </span>
-
-                  <strong>
-                    {intelligence.predicted_yield} t/ha
-                  </strong>
-
-                  <small>
-                    Predicted rice yield
-                  </small>
-
+                <div className="result-primary">
+                  <span>PROJECTED YIELD</span>
+                  <strong>{intelligence.predicted_yield} t/ha</strong>
+                  <small>Predicted rice yield</small>
                 </div>
 
-                <div>
-                  <span>HISTORICAL BASELINE</span>
-                  <strong>{intelligence.rolling_3y_yield} t/ha</strong>
+                <div className="result-comparison">
+                  <div>
+                    <span>HISTORICAL BASELINE</span>
+                    <strong>{intelligence.rolling_3y_yield} t/ha</strong>
+                  </div>
+                  <div>
+                    <span>YIELD GAP</span>
+                    <strong>{intelligence.yield_gap_percent}%</strong>
+                  </div>
                 </div>
 
-                <div>
-                  <span>YIELD GAP</span>
-                  <strong>{intelligence.yield_gap_percent}%</strong>
+                <div className="result-section-label">LIVE CONTEXT</div>
+
+                <div className="result-context">
+                  <div><span>NDVI</span><strong>{intelligence.NDVI}</strong></div>
+                  <div><span>TEMPERATURE</span><strong>{intelligence["current temperature"]} °C</strong></div>
+                  <div><span>HUMIDITY</span><strong>{intelligence["current humidity"]} %</strong></div>
+                  <div><span>3-DAY RAINFALL</span><strong>{rainfallTotal} mm</strong></div>
                 </div>
 
-                <div>
-                  <span>NDVI</span>
-                  <strong>{intelligence.NDVI}</strong>
-                </div>
+                <div className="result-section-label">SATELLITE</div>
 
-                <div>
-                  <span>TEMPERATURE</span>
-                  <strong>{intelligence["current temperature"]} °C</strong>
-                </div>
-
-                <div>
-                  <span>HUMIDITY</span>
-                  <strong>{intelligence["current humidity"]} %</strong>
-                </div>
-
-                <div>
-                  <span>CURRENT PRECIPITATION</span>
-                  <strong>{intelligence["current precipitation"]} mm</strong>
-                </div>
-
-                <div>
-                  <span>SATELLITE</span>
-                  <strong>{intelligence["NDVI scene date"]}</strong>
-                </div>
-
-                <div>
-                  <span>CLOUD COVER</span>
-                  <strong>{intelligence["satellite cloud cover"]} %</strong>
+                <div className="result-satellite">
+                  <div><span>SCENE DATE</span><strong>{intelligence["NDVI scene date"]}</strong></div>
+                  <div><span>CLOUD COVER</span><strong>{intelligence["satellite cloud cover"]} %</strong></div>
                 </div>
 
               </div>
@@ -1245,6 +1222,23 @@ function App() {
               )}
 
             </div>
+
+            {intelligence?.decision && (
+              <div className="decision-output">
+                <div className="decision-priority">
+                  <span>PRIORITY</span>
+                  <strong>{intelligence.decision.priority}</strong>
+                </div>
+                <div>
+                  <span>DECISION BASIS</span>
+                  <p>{intelligence.decision.reason}</p>
+                </div>
+                <div>
+                  <span>RECOMMENDED ACTION</span>
+                  <p>{intelligence.decision.recommended_action}</p>
+                </div>
+              </div>
+            )}
 
           </div>
 

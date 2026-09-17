@@ -3,8 +3,8 @@ from pathlib import Path
 import joblib
 import pandas as pd
 
-from .ndvi import calculate_ndvi
-from .weather import get_weather
+from services.ndvi import calculate_ndvi
+from services.weather import get_weather
 
 
 BASE_DIR = Path(__file__).resolve().parents[2]
