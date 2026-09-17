@@ -5,7 +5,8 @@ import pandas as pd
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from services.intelligence import get_agricultural_intelligence
+from .services.intelligence import get_agricultural_intelligence
+from .services.decision_agent import generate_field_decision
 
 
 # ============================================================
@@ -13,7 +14,6 @@ from services.intelligence import get_agricultural_intelligence
 # ============================================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 MODEL_PATH = BASE_DIR / "ml" / "rice_yield_model.pkl"
 
 
@@ -40,7 +40,7 @@ app = FastAPI(
 
 
 # ============================================================
-# INPUT DATA STRUCTURE
+# INPUT DATA STRUCTURES
 # ============================================================
 
 class PredictionRequest(BaseModel):
@@ -79,7 +79,6 @@ def root():
 @app.post("/predict")
 def predict(request: PredictionRequest):
 
-    # Convert incoming request into a DataFrame
     input_data = pd.DataFrame(
         [
             {
@@ -95,7 +94,6 @@ def predict(request: PredictionRequest):
         ]
     )
 
-    # Generate prediction
     predicted_yield = model.predict(input_data)[0]
 
     return {
@@ -104,9 +102,18 @@ def predict(request: PredictionRequest):
     }
 
 
+# ============================================================
+# FULL AGRICULTURAL ANALYSIS + SINGLE DECISION AGENT
+# ============================================================
+
 @app.post("/analyze")
 def analyze(request: AnalyzeRequest):
-    return get_agricultural_intelligence(
+
+    # --------------------------------------------------------
+    # Step 1: Generate agricultural intelligence
+    # --------------------------------------------------------
+
+    intelligence = get_agricultural_intelligence(
         latitude=request.latitude,
         longitude=request.longitude,
         state=request.state,
@@ -118,3 +125,20 @@ def analyze(request: AnalyzeRequest):
         rolling_3y_yield=request.rolling_3y_yield,
         previous_year_area=request.previous_year_area,
     )
+
+    # --------------------------------------------------------
+    # Step 2: Run the Single Decision Agent
+    # --------------------------------------------------------
+
+    decision = generate_field_decision(
+        intelligence
+    )
+
+    # --------------------------------------------------------
+    # Step 3: Return intelligence + decision
+    # --------------------------------------------------------
+
+    return {
+        **intelligence,
+        "decision": decision,
+    }
