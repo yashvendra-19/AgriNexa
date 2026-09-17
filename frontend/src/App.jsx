@@ -14,6 +14,12 @@ import {
 
 import "./App.css";
 
+import FieldIntelligence from "./pages/FieldIntelligence";
+import Analytics from "./pages/Analytics";
+import AIAdvisor from "./pages/AIAdvisor";
+import Reports from "./pages/Reports";
+
+
 
 // ============================================================
 // SAMPLE AGRICULTURAL FIELDS
@@ -331,6 +337,13 @@ const fields = [
 function App() {
 
   // ----------------------------------------------------------
+  // Active navigation tab
+  // ----------------------------------------------------------
+
+  const [activeTab, setActiveTab] = useState("dashboard");
+
+
+  // ----------------------------------------------------------
   // Selected field
   // ----------------------------------------------------------
 
@@ -507,32 +520,48 @@ function App() {
 
         <nav>
 
-          <div className="nav-item active">
+          <div
+            className={`nav-item ${activeTab === "dashboard" ? "active" : ""}`}
+            onClick={() => setActiveTab("dashboard")}
+          >
             <BarChart3 size={18} />
             Dashboard
           </div>
 
-          <div className="nav-item">
+          <div
+            className={`nav-item ${activeTab === "field-intelligence" ? "active" : ""}`}
+            onClick={() => setActiveTab("field-intelligence")}
+          >
             <Map size={18} />
             Field Intelligence
           </div>
 
-          <div className="nav-item">
+          <div
+            className={`nav-item ${activeTab === "analytics" ? "active" : ""}`}
+            onClick={() => setActiveTab("analytics")}
+          >
             <Activity size={18} />
             Analytics
           </div>
 
-          <div className="nav-item">
+          <div
+            className={`nav-item ${activeTab === "ai-advisor" ? "active" : ""}`}
+            onClick={() => setActiveTab("ai-advisor")}
+          >
             <BrainCircuit size={18} />
             AI Advisor
           </div>
 
-          <div className="nav-item">
+          <div
+            className={`nav-item ${activeTab === "reports" ? "active" : ""}`}
+            onClick={() => setActiveTab("reports")}
+          >
             <FileText size={18} />
             Reports
           </div>
 
         </nav>
+
 
 
         {/* SYSTEM STATUS */}
@@ -564,12 +593,14 @@ function App() {
 
       <main className="main">
 
+        {activeTab === "dashboard" && (
+          <>
+            {/* ===================================================
+                TOP HEADER
+            ==================================================== */}
 
-        {/* ===================================================
-            TOP HEADER
-        ==================================================== */}
+            <header className="topbar">
 
-        <header className="topbar">
 
           <div>
 
@@ -1261,8 +1292,56 @@ function App() {
           </span>
 
         </footer>
+          </>
+        )}
+
+        {activeTab === "field-intelligence" && (
+          <FieldIntelligence
+            fields={fields}
+            selectedField={selectedField}
+            onSelectField={setSelectedField}
+            intelligence={intelligence}
+            loading={loading}
+            analysisStage={analysisStage}
+            error={error}
+            onAnalyze={analyzeField}
+          />
+        )}
+
+        {activeTab === "analytics" && (
+          <Analytics
+            fields={fields}
+            onInspectField={(field) => {
+              setSelectedField(field);
+              setActiveTab("field-intelligence");
+            }}
+          />
+        )}
+
+        {activeTab === "ai-advisor" && (
+          <AIAdvisor
+            fields={fields}
+            selectedField={selectedField}
+            onSelectField={setSelectedField}
+            intelligence={intelligence}
+            loading={loading}
+            onAnalyze={analyzeField}
+          />
+        )}
+
+        {activeTab === "reports" && (
+          <Reports
+            fields={fields}
+            selectedField={selectedField}
+            onSelectField={setSelectedField}
+            intelligence={intelligence}
+            onAnalyze={analyzeField}
+            loading={loading}
+          />
+        )}
 
       </main>
+
 
     </div>
   );

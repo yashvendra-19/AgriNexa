@@ -1,13 +1,25 @@
+import os
 import numpy as np
 import planetary_computer
 import pystac_client
 import rasterio
+
+# Set rasterio proj data path if rasterio has bundled proj_data
+try:
+    proj_dir = os.path.join(os.path.dirname(rasterio.__file__), "proj_data")
+    if os.path.exists(proj_dir):
+        os.environ["PROJ_LIB"] = proj_dir
+        os.environ["PROJ_DATA"] = proj_dir
+except Exception:
+    pass
+
 from rasterio.windows import Window
 from rasterio.warp import transform
 
 
 STAC_URL = "https://planetarycomputer.microsoft.com/api/stac/v1"
 COLLECTION = "sentinel-2-l2a"
+
 
 
 def get_latest_sentinel_item(latitude: float, longitude: float):
