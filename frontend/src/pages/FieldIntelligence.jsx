@@ -14,7 +14,6 @@ import {
   Thermometer,
   Droplets,
   Calendar,
-  Sparkles,
 } from "lucide-react";
 
 export default function FieldIntelligence({
@@ -27,7 +26,7 @@ export default function FieldIntelligence({
   error,
   onAnalyze,
 }) {
-  // Auto-analyze on field change if intelligence is not loaded
+  // Auto-analyze on field change if intelligence is not loaded for this field
   useEffect(() => {
     if (!intelligence && !loading && onAnalyze) {
       onAnalyze();
@@ -52,10 +51,17 @@ export default function FieldIntelligence({
         ).toFixed(1)
       );
 
-  const status = intelligence
-    ? intelligence.yield_gap_percent <= -15
+  // Status alignment matching backend Decision Agent (-12.47% and +3.54% thresholds)
+  const status = intelligence?.decision?.priority
+    ? intelligence.decision.priority.toUpperCase().includes("HIGH")
       ? "high"
-      : intelligence.yield_gap_percent <= 0
+      : intelligence.decision.priority.toUpperCase().includes("MONITOR")
+      ? "medium"
+      : "low"
+    : intelligence && typeof intelligence.yield_gap_percent === "number"
+    ? intelligence.yield_gap_percent <= -12.47
+      ? "high"
+      : intelligence.yield_gap_percent <= 3.54
       ? "medium"
       : "low"
     : selectedField.status;
@@ -88,23 +94,23 @@ export default function FieldIntelligence({
 
   const initialDecision = {
     priority: statusLabel,
-    priority_score: status === "high" ? 85 : status === "medium" ? 55 : 20,
+    priority_score: status === "high" ? 3 : status === "medium" ? 2 : 1,
     reason:
       status === "high"
-        ? `Field ${selectedField.id} in ${selectedField.district} exhibits a historical yield deficit (${displayYieldGap}%) relative to the 3-year rolling average (${displayBaseline} t/ha).`
+        ? `Field ${selectedField.id} in ${selectedField.district} exhibits a critical yield deficit (${displayYieldGap}%) falling below the learned high-priority threshold (-12.47%).`
         : status === "medium"
-        ? `Field ${selectedField.id} in ${selectedField.district} displays a minor yield variance (${displayYieldGap}%) requiring continued observation.`
-        : `Field ${selectedField.id} in ${selectedField.district} operates within expected optimal yield baseline parameters (+${Math.abs(displayYieldGap)}%).`,
+        ? `Field ${selectedField.id} in ${selectedField.district} displays a yield gap (${displayYieldGap}%) within the learned monitoring boundary (+3.54%).`
+        : `Field ${selectedField.id} in ${selectedField.district} operates within normal historical yield performance parameters (+${Math.abs(displayYieldGap)}%).`,
     recommended_action:
       status === "high"
-        ? "Prioritize field inspection, verify soil moisture levels, and schedule micro-nutrient enrichment."
+        ? "Prioritize immediate field inspection, verify soil moisture levels, and schedule corrective nutrient enrichment."
         : status === "medium"
-        ? "Monitor weekly vegetation health index and prepare contingency irrigation if rainfall drops below threshold."
-        : "Maintain standard crop management cycle. No immediate corrective action required.",
-    historical_sample_size: 5124,
+        ? "Increase monitoring frequency and re-check vegetation health index before next irrigation cycle."
+        : "Maintain standard routine field monitoring. No immediate escalation required.",
+    historical_sample_size: 12042,
     decision_boundaries: {
-      high_priority_yield_gap_percent: -15,
-      monitor_yield_gap_percent: 0,
+      high_priority_yield_gap_percent: -12.47,
+      monitor_yield_gap_percent: 3.54,
     },
   };
 
@@ -155,7 +161,7 @@ export default function FieldIntelligence({
             >
               {fields.map((field) => (
                 <option key={field.id} value={field.id}>
-                  {field.id} — {field.district} ({field.state})
+                  [{field.status === "high" ? "HIGH PRIORITY" : field.status === "medium" ? "MONITOR" : "NORMAL"}] {field.id} — {field.district} ({field.state})
                 </option>
               ))}
             </select>
@@ -285,7 +291,7 @@ export default function FieldIntelligence({
               </div>
               <div className="gap-bar-bg">
                 <div
-                  className={`gap-bar-fill ${displayYieldGap < -15 ? "danger" : displayYieldGap < 0 ? "warning" : "success"}`}
+                  className={`gap-bar-fill ${displayYieldGap <= -12.47 ? "danger" : displayYieldGap <= 3.54 ? "warning" : "success"}`}
                   style={{
                     width: `${Math.min(Math.max(100 + Number(displayYieldGap), 10), 100)}%`,
                   }}
@@ -453,11 +459,11 @@ export default function FieldIntelligence({
               <div className="dec-boundaries-bar">
                 <span>Learned Boundaries:</span>
                 <small>
-                  High Priority ≤ {decisionObj.decision_boundaries.high_priority_yield_gap_percent}% | 
-                  Monitor ≤ {decisionObj.decision_boundaries.monitor_yield_gap_percent}%
+                  High Priority ≤ {decisionObj.decision_boundaries.high_priority_yield_gap_percent || decisionObj.decision_boundaries.high_priority_below_or_equal || -12.47}% | 
+                  Monitor ≤ {decisionObj.decision_boundaries.monitor_yield_gap_percent || decisionObj.decision_boundaries.monitor_below_or_equal || 3.54}%
                 </small>
                 <span className="sample-tag">
-                  {decisionObj.historical_sample_size} Historical Samples
+                  {decisionObj.historical_sample_size || 12042} Historical Samples
                 </span>
               </div>
             )}

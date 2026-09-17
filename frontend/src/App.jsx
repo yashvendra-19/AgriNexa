@@ -83,7 +83,7 @@ const fields = [
     previous_year_yield: 1.8660170523751525,
     rolling_3y_yield: 1.5384063048988008,
     previous_year_area: 82100,
-    status: "medium",
+    status: "low",
     latitude: 18.5204,
     longitude: 73.8567,
   },
@@ -143,7 +143,7 @@ const fields = [
     previous_year_yield: 1.9849310571240968,
     rolling_3y_yield: 2.8272092728130382,
     previous_year_area: 60920,
-    status: "medium",
+    status: "high",
     latitude: 24.7955,
     longitude: 84.9994,
   },
@@ -173,7 +173,7 @@ const fields = [
     previous_year_yield: 1,
     rolling_3y_yield: 1,
     previous_year_area: 4,
-    status: "low",
+    status: "medium",
     latitude: 22.7196,
     longitude: 75.8577,
   },
@@ -218,7 +218,7 @@ const fields = [
     previous_year_yield: 2.8461538461538463,
     rolling_3y_yield: 2.802086534695231,
     previous_year_area: 182000,
-    status: "low",
+    status: "medium",
     latitude: 31.634,
     longitude: 74.8723,
   },
@@ -233,7 +233,7 @@ const fields = [
     previous_year_yield: 4.424124513618677,
     rolling_3y_yield: 4.409857328145266,
     previous_year_area: 257000,
-    status: "low",
+    status: "medium",
     latitude: 30.901,
     longitude: 75.8573,
   },
@@ -263,7 +263,7 @@ const fields = [
     previous_year_yield: 2.586146641504159,
     rolling_3y_yield: 2.428552115473761,
     previous_year_area: 42921,
-    status: "medium",
+    status: "low",
     latitude: 29.1492,
     longitude: 75.7217,
   },
@@ -293,7 +293,7 @@ const fields = [
     previous_year_yield: 3.825654519142218,
     rolling_3y_yield: 3.758202457869276,
     previous_year_area: 76010,
-    status: "low",
+    status: "medium",
     latitude: 15.1394,
     longitude: 76.9214,
   },
@@ -459,10 +459,16 @@ function App() {
   };
 
 
-  const status = intelligence
-    ? intelligence.yield_gap_percent <= -15
+  const status = intelligence?.decision?.priority
+    ? intelligence.decision.priority.toUpperCase().includes("HIGH")
       ? "high"
-      : intelligence.yield_gap_percent <= 0
+      : intelligence.decision.priority.toUpperCase().includes("MONITOR")
+      ? "medium"
+      : "low"
+    : intelligence && typeof intelligence.yield_gap_percent === "number"
+    ? intelligence.yield_gap_percent <= -12.47
+      ? "high"
+      : intelligence.yield_gap_percent <= 3.54
       ? "medium"
       : "low"
     : selectedField.status;

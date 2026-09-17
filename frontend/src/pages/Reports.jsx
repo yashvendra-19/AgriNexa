@@ -141,7 +141,7 @@ Humidity          : ${intelligence ? intelligence["current humidity"] + "%" : "N
 
 AI DECISION AGENT GUIDANCE
 --------------------------
-Priority          : ${intelligence?.decision ? intelligence.decision.priority : selectedField.status.toUpperCase()}
+Priority          : ${intelligence?.decision ? intelligence.decision.priority : selectedField.status === "high" ? "HIGH PRIORITY" : selectedField.status === "medium" ? "MONITOR" : "NORMAL"}
 Reason            : ${intelligence?.decision ? intelligence.decision.reason : "N/A"}
 Recommended Action: ${intelligence?.decision ? intelligence.decision.recommended_action : "N/A"}
 
@@ -205,7 +205,7 @@ CONFIDENTIAL AGRICULTURAL INTELLIGENCE - AGRINEXA MVP
             >
               {fields.map((f) => (
                 <option key={f.id} value={f.id}>
-                  {f.id} — {f.district}, {f.state}
+                  [{f.status === "high" ? "HIGH PRIORITY" : f.status === "medium" ? "MONITOR" : "NORMAL"}] {f.id} — {f.district}, {f.state}
                 </option>
               ))}
             </select>
@@ -344,7 +344,7 @@ CONFIDENTIAL AGRICULTURAL INTELLIGENCE - AGRINEXA MVP
                 </div>
               ) : (
                 <p className="rpt-pending-text">
-                  Decision evaluation pending. Default Field Status: <strong>{selectedField.status.toUpperCase()}</strong>.
+                  Decision evaluation pending. Default Field Status: <strong>{selectedField.status === "high" ? "HIGH PRIORITY" : selectedField.status === "medium" ? "MONITOR" : "NORMAL"}</strong>.
                 </p>
               )}
             </div>

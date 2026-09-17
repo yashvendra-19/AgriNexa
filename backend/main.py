@@ -24,6 +24,8 @@ MODEL_PATH = BASE_DIR / "ml" / "rice_yield_model.pkl"
 print("Loading AgriNexa ML model...")
 
 model = joblib.load(MODEL_PATH)
+if hasattr(model, "n_jobs"):
+    model.n_jobs = 1
 
 print("ML model loaded successfully.")
 
@@ -94,12 +96,14 @@ def predict(request: PredictionRequest):
         ]
     )
 
-    predicted_yield = model.predict(input_data)[0]
+    with joblib.parallel_backend("sequential"):
+        predicted_yield = model.predict(input_data)[0]
 
     return {
         "predicted_yield": round(float(predicted_yield), 3),
         "unit": "tonnes/hectare",
     }
+
 
 
 # ============================================================

@@ -27,6 +27,9 @@ def get_agricultural_intelligence(
 		raise ValueError("rolling_3y_yield must not be zero")
 
 	model = joblib.load(MODEL_PATH)
+	if hasattr(model, "n_jobs"):
+		model.n_jobs = 1
+
 	input_data = pd.DataFrame(
 		[
 			{
@@ -42,7 +45,9 @@ def get_agricultural_intelligence(
 		]
 	)
 
-	predicted_yield = float(model.predict(input_data)[0])
+	with joblib.parallel_backend("sequential"):
+		predicted_yield = float(model.predict(input_data)[0])
+
 	weather = get_weather(latitude, longitude)
 	ndvi = calculate_ndvi(latitude, longitude)
 
